@@ -125,7 +125,7 @@ MediaPopupAsset::register($this);
                                 'class'       => 'input-sm form-control',
                             ]); ?>
 
-                            <?php if (isset($post)) echo Html::hiddenInput('id', $post->id) ?>
+                            <?php // if (isset($post)) echo Html::hiddenInput('id', $post->id) ?>
 
                         </div>
 
