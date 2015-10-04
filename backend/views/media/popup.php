@@ -138,7 +138,7 @@ MediaPopupAsset::register($this);
                     </form>
 
                     <div class="content-left">
-                        <ul id="file-container" class="file-container clearfix"></ul>
+                        <ul id="file-container" class="file-container clearfix" data-multiple="<?= $multiple?1:0?>" data-editor="<?= $editor?1:0?>"></ul>
                         <nav id="media-pagination" class="media-pagination"></nav>
                     </div>
 
@@ -155,6 +155,8 @@ MediaPopupAsset::register($this);
                             'data-insert-url' => $editor ?
                                 Url::to(['/media/editor-insert']) :
                                 Url::to(['/media/field-insert']),
+							'data-editor' => $editor ?'1':'0',
+							'data-json' => $editor?'0':($json?'1':'0')
                         ]); ?>
 
                     </div>

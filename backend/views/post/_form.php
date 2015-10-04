@@ -31,9 +31,16 @@ use codezeen\yii2\tinymce\TinyMce;
         ])->textInput(['maxlength' => 255, 'placeholder' => $model->getAttributeLabel('post_slug')]) ?>
 
         <?php if (Yii::$app->user->can('author')) {
-            echo '<div class="form-group">';
-            echo Html::button('<i class="fa fa-folder-open"></i> ' . Yii::t('writesdown', 'Open Media'), ['data-url' => Url::to(['/media/popup', 'post_id' => $model->id, 'editor' => true]), 'class' => 'open-editor-media btn btn-default btn-flat']);
-            echo '</div>';
+//            echo '<div class="form-group">';
+//            echo Html::button('<i class="fa fa-folder-open"></i> ' . Yii::t('writesdown', 'Open Media'), ['data-url' => Url::to(['/media/popup', 'post_id' => $model->id, 'editor' => true]), 'class' => 'open-editor-media btn btn-default btn-flat']);
+//            echo '</div>';
+				echo \backend\widgets\renderFileManager\RenderFileManager::widget([
+					'postId'=>$model->id,
+					'editor' => true,
+					'buttonOptions' => [
+						'class' => 'btn btn-default btn-flat',
+					]
+				]);
         } ?>
 
         <?= $form->field($model, 'post_content', ["template" => "{input}\n{error}"])->widget(
@@ -61,26 +68,26 @@ use codezeen\yii2\tinymce\TinyMce;
     </div>
 
 <?php $this->registerJs('
-$(function () {
-    "use strict";
-    $(".open-editor-media ").click(function (e) {
-        e.preventDefault();
-        var w = window,
-            d = document,
-            e = d.documentElement,
-            g = d.getElementsByTagName("body")[0],
-            x = w.innerWidth || e.clientWidth || g.clientWidth,
-            y = w.innerHeight|| e.clientHeight|| g.clientHeight;
-
-        tinyMCE.activeEditor.windowManager.open({
-            file : $(this).data("url"),
-            title : "Filemanager",
-            width : x * 0.95,
-            height : y * 0.9,
-            resizable : "yes",
-            inline : "yes",
-            close_previous : "no"
-        });
-    });
-});
+//$(function () {
+//    "use strict";
+//    $(".open-editor-media ").click(function (e) {
+//        e.preventDefault();
+//        var w = window,
+//            d = document,
+//            e = d.documentElement,
+//            g = d.getElementsByTagName("body")[0],
+//            x = w.innerWidth || e.clientWidth || g.clientWidth,
+//            y = w.innerHeight|| e.clientHeight|| g.clientHeight;
+//
+//        tinyMCE.activeEditor.windowManager.open({
+//            file : $(this).data("url"),
+//            title : "'.Yii::t('writesdown', 'Filemanager').'",
+//            width : x * 0.95,
+//            height : y * 0.9,
+//            resizable : "yes",
+//            inline : "yes",
+//            close_previous : "no"
+//        });
+//    });
+//});
 ');

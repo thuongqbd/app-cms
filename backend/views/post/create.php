@@ -56,7 +56,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 'postType' => $postType,
                 'form'     => $form
             ]) ?>
-
+			
+			<?= $this->render('_form-featured-image', [
+                'model' => $model,
+                'form'  => $form
+            ]); ?>
         </div>
     </div>
 

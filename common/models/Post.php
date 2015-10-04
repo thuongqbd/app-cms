@@ -34,6 +34,7 @@ use common\components\Json;
  * @property string             $post_slug
  * @property string             $post_comment_status
  * @property integer            $post_comment_count
+ * @property integer            $post_featured
  * @property string             $url
  * @property []                 $poststatus
  *
@@ -44,7 +45,8 @@ use common\components\Json;
  * @property PostMeta[]         $postMeta
  * @property TermRelationship[] $termRelationships
  * @property Term[]             $terms
- *
+ * @property Media				$postFeaturedImage
+ * 
  * @package  common\models
  * @author   Agiel K. Saputra <13nightevil@gmail.com>
  * @since    1.0
@@ -403,5 +405,13 @@ class Post extends ActiveRecord
         } else {
             return false;
         }
+    }
+	
+	/**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPostFeaturedImage()
+    {
+		return $this->hasOne(Media::className(), ['id' => 'post_featured']);
     }
 }

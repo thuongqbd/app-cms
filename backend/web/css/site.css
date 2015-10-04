@@ -207,7 +207,10 @@ a.desc:after {
 .widget-configuration .form-group:last-child{
     margin-bottom: 0;
 }
-
+.nopadding {
+   padding: 0 !important;
+   margin: 0 !important;
+}
 /* RESPONSIVE */
 @media (max-width: 767px) {
     .grid-view{

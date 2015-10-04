@@ -17,6 +17,7 @@ use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
+use common\components\Json;
 
 /* UPLOAD HANDLER */
 use common\components\MediaUploadHandler;
@@ -201,14 +202,24 @@ class MediaController extends Controller
                 throw new ForbiddenHttpException(Yii::t('writesdown', 'You are not allowed to perform this action.'));
             }
             $model->{Yii::$app->request->post('attribute')} = Yii::$app->request->post('attribute_value');
-            if ($model->save()) {
-                echo Yii::t('writesdown', 'Updated, {attribute}: {attribute_value}', [
-                    'attribute'       => Yii::$app->request->post('attribute'),
-                    'attribute_value' => Yii::$app->request->post('attribute_value')
-                ]);
-            };
-
-        }
+			try {
+				$result = [
+					"success" => $model->save(),
+					"message" => Yii::t('writesdown', 'Updated, {attribute}: {attribute_value}', [
+							'attribute'       => Yii::$app->request->post('attribute'),
+							'attribute_value' => Yii::$app->request->post('attribute_value')
+						]),
+					Yii::$app->request->post('attribute') => $model->{Yii::$app->request->post('attribute')}					
+				];
+			} catch (\yii\base\Exception $exc) {
+				$result = [
+					"success" => false,
+					"message" => $exc->getMessage(),
+					Yii::$app->request->post('attribute') => $model->{Yii::$app->request->post('attribute')}					
+				];
+			}
+			echo Json::encode($result);
+		}
     }
 
     /**
@@ -251,11 +262,13 @@ class MediaController extends Controller
      *
      * @param int|null $post_id
      * @param bool     $editor
-     *
+     * @param bool     $json
+	 * @param bool     $multiple
+	 * 
      * @throws \yii\web\NotFoundHttpException
      * @return string
      */
-    public function actionPopup($post_id = null, $editor = false)
+    public function actionPopup($post_id = null, $editor = false, $json = false,$multiple = false)
     {
         $this->layout = "blank";
         $model = new Media(['scenario' => 'upload']);
@@ -266,6 +279,8 @@ class MediaController extends Controller
                     'post'   => $post,
                     'model'  => $model,
                     'editor' => $editor,
+					'json' => $json,
+					'multiple' => $multiple
                 ]);
             } else {
                 throw new NotFoundHttpException(Yii::t('writesdown', 'The requested page does not exist.'));
@@ -309,11 +324,16 @@ class MediaController extends Controller
             foreach ($post['media'] as $postMedia) {
                 $media = $this->findModel($postMedia['id']);
                 $metadata = $media->getMeta('metadata');
-                if ($postMedia['media_type'] === 'image') {
-                    echo $media->getUploadUrl() . $metadata['media_versions'][ $postMedia['media_size'] ]['url'];
-                } else {
-                    echo $media->getUploadUrl() . $metadata['media_versions']['full']['url'];
-                }
+				if(isset($post['json'])){
+					$result = \yii\helpers\ArrayHelper::merge($media->attributes, $metadata);
+					echo \yii\helpers\Json::encode($result);
+				}else{
+					if ($postMedia['media_type'] === 'image') {
+						echo $media->getUploadUrl() . $metadata['media_versions'][ $postMedia['media_size'] ]['url'];
+					} else {
+						echo $media->getUploadUrl() . $metadata['media_versions']['full']['url'];
+					}
+				}               
                 break;
             }
         }

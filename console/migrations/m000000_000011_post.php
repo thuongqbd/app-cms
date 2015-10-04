@@ -34,6 +34,7 @@ class m000000_000011_post extends \yii\db\Migration
             'post_slug'           => Schema::TYPE_STRING . '(255) NOT NULL',
             'post_comment_status' => Schema::TYPE_STRING . "(20) NOT NULL DEFAULT 'open'",
             'post_comment_count'  => Schema::TYPE_INTEGER . '(11) NOT NULL DEFAULT 0',
+			'post_featured'       => Schema::TYPE_INTEGER . '(11)',
             'FOREIGN KEY ([[post_type]]) REFERENCES {{%post_type}} ([[id]]) ON DELETE SET NULL ON UPDATE CASCADE',
             'FOREIGN KEY ([[post_author]]) REFERENCES {{%user}} ([[id]]) ON DELETE CASCADE ON UPDATE CASCADE',
         ], $tableOptions);

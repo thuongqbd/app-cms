@@ -140,24 +140,42 @@
     });
 
     /* SHOW DETAIL ITEM */
-    fc.selectable({
-        filter: "li",
-        tolerance: "fit",
-        selected: function (event, ui) {
-            $.each(me.files, function (i, file) {
+	fc.on("mousedown", function(e) {
+		e.metaKey = true;
+	}).selectable({
+		filter: "li",
+		tolerance: "fit",
+		selected: function (event, ui) {
+			$.each(me.files, function (i, file) {
+				if ($(ui.selected).data('id') === file.id) {
+					md.html(tmpl('template-media-detail', file));
+					
+					if(fc.data('editor') == 1){
+						file.for_editor = true;
+					}else{
+						file.for_editor = false;
+					}
+					mf.html(tmpl('template-media-form', file));
+					
+					if(fc.data('multiple') == 0){
+						$(ui.selected).addClass("ui-selected").siblings().removeClass("ui-selected").each(
+							function(key,value){
+								$(value).find('*').removeClass("ui-selected");
+							}
+						);
+						se = {};						
+					}
+					se[$(ui.selected).data("id")] = $("#media-form-inner").serializeObject();
+					
+				}
 
-                if ($(ui.selected).data('id') === file.id) {
-                    md.html(tmpl('template-media-detail', file));
-                    mf.html(tmpl('template-media-form', file));
-                    se[$(ui.selected).data("id")] = $("#media-form-inner").serializeObject();
-                }
-
-            });
-        },
-        unselected: function (event, ui) {
-            delete se[$(ui.unselected).data('id')];
-        }
-    });
+			});
+		},
+		unselected: function (event, ui) {
+			delete se[$(ui.unselected).data('id')];
+		}
+	});
+    
 
     /* UPDATE SELECTED */
     $(document).on("blur", "#media-form-inner [id^='media-']", function () {
@@ -169,17 +187,27 @@
     /* UPDATE TITLE, EXCERPT, CONTENT OF MEDIA VIA AJAX CALL */
     $(document).on("blur", "#media-media_title, #media-media_excerpt, #media-media_content", function () {
         var mfi = $(this).closest('#media-form-inner');
+		var attribute = $(this).data('attr');
+		var mId = mfi.data("id");
         $.ajax({
             url: mfi.data("update-url"),
             type: "POST",
+			dataType: 'json',
             data: {
-                id: mfi.data("id"),
-                attribute: $(this).data('attr'),
+                id: mId,
+                attribute: attribute,
                 attribute_value: $(this).val(),
                 _csrf: yii.getCsrfToken()
             },
             success: function(response){
-                console.log(response);
+				$.each(me.files, function (index, file) {
+					if(file.id == mId){
+						me.files[index][attribute] = response[attribute];					
+						mf.html(tmpl('template-media-form', me.files[index]));
+						md.html(tmpl('template-media-detail', me.files[index]));
+						return false;
+					}
+				});				
             }
         });
     });
@@ -247,23 +275,26 @@
         });
     });
 
-    /* INSERT INTO TINY MCE */
+    /* INSERT INTO CONTAINER */
     $(document).on("click", "#insert-media", function (e) {
         e.preventDefault();
-        if(top.tinymce !== undefined){
+		if(Object.keys(se).length == 0){
+			return false;
+		}
+		/* INSERT INTO TINY MCE */
+        if(top.tinymce !== undefined && $(this).data('editor') == 1){
             $.ajax({
                 url: $(this).data('insert-url'),
                 data: {media: se, _csrf: yii.getCsrfToken()},
                 type: 'POST',
                 success: function(response){
                     top.tinymce.activeEditor.execCommand("mceInsertContent", false, response);
-                    top.tinymce.activeEditor.windowManager.close();
                 }
             });
         }else{
             $.ajax({
                 url: $(this).data('insert-url'),
-                data: {media: se, _csrf: yii.getCsrfToken()},
+                data: {media: se, _csrf: yii.getCsrfToken(),json:$(this).data('json')},
                 type: 'POST',
                 success: function(response){
                     alert(response);

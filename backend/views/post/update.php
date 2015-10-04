@@ -58,7 +58,11 @@ $this->params['breadcrumbs'][] = Yii::t('writesdown', 'Update');
                 'postType'  => $postType,
                 'form'      => $form
             ]) ?>
-
+			
+			<?= $this->render('_form-featured-image', [
+                'model' => $model,
+                'form'  => $form
+            ]); ?>
         </div>
     </div>
 
