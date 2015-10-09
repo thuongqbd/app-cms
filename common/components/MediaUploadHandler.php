@@ -606,7 +606,7 @@ class MediaUploadHandler {
                     'crop'       => 1
                 ]
             ],
-            'files_per_page'                   => 100,
+            'files_per_page'                   => 10,
             'print_response'                   => true
         ];
 

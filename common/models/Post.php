@@ -95,7 +95,7 @@ class Post extends ActiveRecord
     {
         return [
             [['post_title', 'post_slug'], 'required'],
-            [['post_author', 'post_type', 'post_comment_count'], 'integer'],
+            [['post_author', 'post_type', 'post_comment_count','post_featured'], 'integer'],
             [['post_title', 'post_excerpt', 'post_content'], 'string'],
             [['post_date', 'post_modified', 'post_author'], 'safe'],
             [['post_status', 'post_comment_status'], 'string', 'max' => 20],

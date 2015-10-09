@@ -18,6 +18,7 @@ use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use common\components\Json;
+use yii\helpers\ArrayHelper;
 
 /* UPLOAD HANDLER */
 use common\components\MediaUploadHandler;
@@ -253,8 +254,29 @@ class MediaController extends Controller
     {
         $uploadHandler = new MediaUploadHandler(null, false);
         $pages = $uploadHandler->getPages();
-
-        return $this->renderPartial('pagination', ['pages' => $pages]);
+		
+		$pageCount = $pages->getPageCount();
+		if ($pageCount < 2 && $pages->hideOnSinglePage) {
+            return '';
+        }
+		$currentPage = $pages->getPage();
+		
+		if($currentPage + 1 < $pageCount){
+			if (($page = $currentPage + 1) >= $pageCount - 1) {
+				$page = $pageCount - 1;
+			}
+			return Html::a(\Yii::t('writesdown', 'View more >>'), \yii\helpers\Url::to(['get-json','page'=>$page+1,'per-page'=>$pages->getPageSize()]), [
+				'class'         => 'pagination-item',
+				'data-post_id'  => Yii::$app->request->get('post_id'),
+				'data-per-page' => $pages->getPageSize(),
+				'data-page' => $page
+			]);
+		}else{
+			return '';
+		}
+//		var_dump($pages->getPageCount(),$pages->getPage());die;
+//		return $pages->getPageSize();
+//        return $this->renderPartial('pagination', ['pages' => $pages]);
     }
 
     /**
@@ -299,20 +321,22 @@ class MediaController extends Controller
     public function actionEditorInsert()
     {
         if (Yii::$app->request->post("media")) {
+			$result = '';
             foreach (Yii::$app->request->post("media") as $postMedia) {
 
                 if ($postMedia['media_type'] == 'image') {
-                    $result = $this->getMediaImage($postMedia);
+                    $result .= $this->getMediaImage($postMedia);
                 } else if ($postMedia['media_type'] == 'video') {
-                    $result = $this->getMediaVideo($postMedia);
+                    $result .= $this->getMediaVideo($postMedia);
                 } else if ($postMedia['media_type'] == 'audio') {
-                    $result = $this->getMediaAudio($postMedia);
+                    $result .= $this->getMediaAudio($postMedia);
                 } else
-                    $result = $this->getMediaFile($postMedia);
-
-                echo $result;
+                    $result .= $this->getMediaFile($postMedia);              
             }
-        }
+			echo Json::encode(['success'=>true,'data'=>$result]);
+		}else{
+			echo Json::encode(['success'=>false]);
+		}
     }
 
     /**
@@ -324,9 +348,11 @@ class MediaController extends Controller
             foreach ($post['media'] as $postMedia) {
                 $media = $this->findModel($postMedia['id']);
                 $metadata = $media->getMeta('metadata');
+				$result[] = ArrayHelper::merge($media->attributes, $metadata);
+				/*
 				if(isset($post['json'])){
-					$result = \yii\helpers\ArrayHelper::merge($media->attributes, $metadata);
-					echo \yii\helpers\Json::encode($result);
+					$result = ArrayHelper::merge($media->attributes, $metadata);
+					echo Json::encode($result);
 				}else{
 					if ($postMedia['media_type'] === 'image') {
 						echo $media->getUploadUrl() . $metadata['media_versions'][ $postMedia['media_size'] ]['url'];
@@ -335,8 +361,12 @@ class MediaController extends Controller
 					}
 				}               
                 break;
+				*/
             }
-        }
+			echo Json::encode(['success'=>true,'data'=>$result]);
+        }else{
+			echo Json::encode(['success'=>false]);
+		}
     }
 
     /**

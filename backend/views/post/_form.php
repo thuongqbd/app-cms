@@ -31,16 +31,20 @@ use codezeen\yii2\tinymce\TinyMce;
         ])->textInput(['maxlength' => 255, 'placeholder' => $model->getAttributeLabel('post_slug')]) ?>
 
         <?php if (Yii::$app->user->can('author')) {
-//            echo '<div class="form-group">';
-//            echo Html::button('<i class="fa fa-folder-open"></i> ' . Yii::t('writesdown', 'Open Media'), ['data-url' => Url::to(['/media/popup', 'post_id' => $model->id, 'editor' => true]), 'class' => 'open-editor-media btn btn-default btn-flat']);
-//            echo '</div>';
-				echo \backend\widgets\renderFileManager\RenderFileManager::widget([
+            echo '<div class="form-group">';
+			echo backend\widgets\mediaBrowser\MediaBrowser::widget([
+					'id' => 'media_browser_content',
 					'postId'=>$model->id,
 					'editor' => true,
 					'buttonOptions' => [
 						'class' => 'btn btn-default btn-flat',
+					],
+					'pluginOptions' => [
+						'multipleSelect' => true,
+						'editor' => new \yii\web\JsExpression('top.tinymce')
 					]
 				]);
+            echo '</div>';				
         } ?>
 
         <?= $form->field($model, 'post_content', ["template" => "{input}\n{error}"])->widget(
@@ -48,16 +52,24 @@ use codezeen\yii2\tinymce\TinyMce;
             [
                 'compressorRoute' => 'helper/tiny-mce-compressor',
                 'settings'        => [
+					'plugins'                => [
+						"advlist autolink lists link image charmap print preview hr anchor pagebreak",
+						"searchreplace visualblocks visualchars code fullscreen",
+						"insertdatetime media nonbreaking save table contextmenu directionality",
+						"template paste textcolor youtube"
+					],
+//					'toolbar'                => "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image youtube media| print preview media | forecolor backcolor | code fullscreen",
                     'menubar'            => false,
                     'skin_url'           => Yii::$app->urlManager->baseUrl . '/editor-skins/writesdown',
                     'toolbar_items_size' => 'medium',
-                    'toolbar'            => "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | code fullscreen",
+                    'toolbar'            => "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link | code fullscreen",
                     'formats'            => [
                         'alignleft'   => ['selector' => 'p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li,table,img', 'classes' => 'align-left'],
                         'aligncenter' => ['selector' => 'p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li,table,img', 'classes' => 'align-center'],
                         'alignright'  => ['selector' => 'p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li,table,img', 'classes' => 'align-right'],
                         'alignfull'   => ['selector' => 'p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li,table,img', 'classes' => 'align-full']
-                    ]
+                    ],
+					'extended_valid_elements' => "iframe[src|width|height|name|align]"
                 ],
                 'options'         => [
                     'style' => 'height:400px;'

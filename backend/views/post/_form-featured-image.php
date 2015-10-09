@@ -10,7 +10,7 @@
 
 use yii\helpers\Url;
 use yii\helpers\Html;
-use yii\helpers\ArrayHelper;
+use common\models\Media;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\Post */
@@ -34,15 +34,27 @@ if($media = $model->postFeaturedImage){
 
 	<div class="box-body">
 		<?php if (Yii::$app->user->can('author')) {
-			echo \backend\widgets\renderFileManager\RenderFileManager::widget([
+			echo backend\widgets\mediaBrowser\MediaBrowser::widget([
+				'id' => 'media_browser_featured',
 				'postId'=>$model->id,
 				'editor' => false,
-				'json'=>true,
 				'multiple'=>false,
 				'buttonTag' => 'a',
 				'buttonContent' => $buttonContent,
 				'buttonOptions' => [
 					'id' => 'set-post-thumbnail'
+				],
+				'pluginOptions' => [
+					'selectCallback' => new \yii\web\JsExpression('function(response){
+					var uploadUrl = "'.Media::getUploadUrl().'";
+					console.log(response);
+					if(response.data){
+						var media = response.data[0];
+						$("#post-post_featured").val(media.id);
+						$("#set-post-thumbnail").html("<img class=\'img-thumbnail\' id=\'post-thumbnail\' src=\'"+uploadUrl+media.media_versions.medium.url+"\'/>");
+						$("#remove-post-thumbnail").show();
+					}
+				}')
 				]
 				]);
         } ?>
@@ -50,9 +62,7 @@ if($media = $model->postFeaturedImage){
 		
 	</div>
 	<div class="box-footer">&nbsp;
-		<?php if($media):?>
-			<a href="#" id="remove-post-thumbnail" ><?= Yii::t('writesdown', 'Remove featured image')?></a>
-		<?php endif?>
+		<a href="#" id="remove-post-thumbnail" style="<?= $media?'':'display: none'?>"><?= Yii::t('writesdown', 'Remove featured image')?></a>
 	</div>
 </div>
 <?php $this->registerJs('
@@ -61,7 +71,7 @@ $(function () {
 	$("#remove-post-thumbnail").on("click", function (e) {
 		e.preventDefault();
 		$("#post-post_featured").val("");
-		$("#set-post-thumbnail").text("'.Yii::t('writesdown', 'Set featured image').'");
+		$("#set-post-thumbnail").html("'.Yii::t('writesdown', 'Set featured image').'");
 		$(this).hide();
 	})
 });

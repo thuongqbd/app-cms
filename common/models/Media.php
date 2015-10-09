@@ -262,7 +262,7 @@ class Media extends ActiveRecord
      *
      * @return string
      */
-    public function getUploadUrl()
+    public static function getUploadUrl()
     {
         return Yii::$app->urlManagerFront->hostInfo . Yii::$app->urlManagerFront->baseUrl . '/uploads/';
     }
