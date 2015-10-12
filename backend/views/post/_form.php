@@ -56,7 +56,7 @@ use codezeen\yii2\tinymce\TinyMce;
 						"advlist autolink lists link image charmap print preview hr anchor pagebreak",
 						"searchreplace visualblocks visualchars code fullscreen",
 						"insertdatetime media nonbreaking save table contextmenu directionality",
-						"template paste textcolor youtube"
+						"template paste textcolor"
 					],
 //					'toolbar'                => "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image youtube media| print preview media | forecolor backcolor | code fullscreen",
                     'menubar'            => false,

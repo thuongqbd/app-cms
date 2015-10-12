@@ -255,6 +255,10 @@ class MediaController extends Controller
         $uploadHandler = new MediaUploadHandler(null, false);
         $pages = $uploadHandler->getPages();
 		
+		if (!$pages) {
+            return Yii::t('writesdown', 'Not found any items.');
+        }
+		
 		$pageCount = $pages->getPageCount();
 		if ($pageCount < 2 && $pages->hideOnSinglePage) {
             return '';

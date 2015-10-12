@@ -9,12 +9,14 @@
 				detail: 'template-media-detail',
 				form: 'template-media-form'
 			},
-			jsonUrl : 'media/get-json',
-			paginationUrl : 'media/get-pagination',
-			selectCallback : '',
-			multipleSelect : false,
-			editor: false,
-			canChooseFileSize : true
+			jsonUrl : 'media/get-json', // Url to get media items with format json
+			paginationUrl : 'media/get-pagination', // Url to get pagination for media items
+			selectCallback : '', // callback function after click insert
+			multipleSelect : false, // Select multi or single item
+			editor: false,  // If true, selected items will be insert to edior(tinyMCE) content. If false will return json object of selected items
+			canChooseFileSize : true,  // Autoload more media when sroll to bottom. If false, show link
+			infiniteScroll : true, // Autoload more media when sroll to bottom. If false, show link
+			reloadOnShow : true, // Reload media items when modal show
 		}, options || {});
 				
 		this.container = $(container);
@@ -29,18 +31,50 @@
 		  this.selectCallback = settings.selectCallback;
 		}
 		var _self = this;
-		this.init = function (){
+		var firstLoaded = false;
+		var init = function (){
 			/* INIT*/
-			this.resizeModal();			
-			this.modalContainer.on("shown.bs.modal", function (e) {
+			_self.resizeModal();	
+			
+			_self.modalContainer.on("shown.bs.modal", function (e) {
 				e.preventDefault();
-				//_self.resize_modal();
-				_self.getData();
+				if(firstLoaded == false || settings.reloadOnShow){
+					_self.getData();
+					firstLoaded = true;
+				}			
 			});
+			if(settings.reloadOnShow){
+				_self.modalContainer.on("shown.bs.modal", function (e) {
+					e.preventDefault();
+					if(firstLoaded == false)
+						_self.getData();
+					firstLoaded = true;
+				});
+			}else{
+				_self.getData();
+				firstLoaded = true;
+			}
+			
 			$( window ).resize(function() {
 				_self.resizeModal();
 			});
+			
 			initFileupload();
+			
+			/* INFINITE SCROLLING MEDIA */
+			if(settings.infiniteScroll){
+				_self.container.find('#media-pagination a').css('display','none');
+				var contentContainer = _self.container.find('.content-container');
+				if( _self.mediaContainer.height() <= contentContainer.height()){
+					 _self.container.find('a.pagination-item').click();
+				}
+				_self.container.find('.content-container').scroll(function () { 
+					if ($(this).scrollTop() >= ( _self.mediaContainer.height() - $(this).height())) {
+						 _self.container.find('a.pagination-item').click();
+					}
+				});
+			}
+			
 			handleSidebar();			
 			handlePaging();		
 			handleSelectItem();			
@@ -60,9 +94,11 @@
 			x = w.innerWidth || e.clientWidth || g.clientWidth,
 			y = w.innerHeight|| e.clientHeight|| g.clientHeight;
 			var dialog = this.modalContainer.find(".modal-dialog").first();
-			dialog.css({"width":(x * 0.95)+"px","height":(y * 0.8)+"px"});
+//			dialog.css({"width":(x * 0.95)+"px","height":(y * 0.9)+"px"});
 			var dialog_body = dialog.find(".modal-body").first();
-			dialog_body.css({"width":(x * 0.95)+"px","height":(y * 0.8)+"px"});
+			console.log((y * 0.9),dialog.find(".modal-footer").height());
+//			dialog_body.css({"width":(x * 0.95)+"px","height":( y * 0.75)+"px"});
+//			dialog_body.css({"height":( y * 0.75)+"px"});
 		};
 		
 		/* INIT FILE UPLOAD*/
@@ -175,7 +211,8 @@
 				var $this = $(this),
 					p1 = $(this).data('page'),
 					p2 = p1 + 1;
-
+				var mp = _self.container.find(".media-pagination");	
+				mp.html('<span class="loading"><i class="fa fa-refresh fa-spin"></i></span>');
 				$.ajax({
 					url: $this.attr('href'),
 					data: {post_id: $this.data('post_id')},
@@ -186,7 +223,6 @@
 							url: settings.paginationUrl,
 							data: {post_id: $this.data('post_id'), page: p2, 'per-page': $this.data('per-page')},
 							success: function (response) {
-								var mp = _self.container.find(".media-pagination");
 								mp.html(response);
 							}
 						});
@@ -195,7 +231,7 @@
 				});
 			});
 		};
-		
+				
 		/* SHOW DETAIL ITEM */
 		var handleSelectItem = function(){	
 			_self.mediaContainer.on("mousedown", function(e) {
@@ -204,6 +240,8 @@
 				filter: "li",
 				tolerance: "fit",
 				selected: function (event, ui) {
+					event.preventDefault();
+					event.stopPropagation();
 					console.log(_self.mediaForm);
 					$.each(_self.mediaItems.files, function (i, file) {
 						if ($(ui.selected).data('id') === file.id) {
@@ -368,7 +406,8 @@
 			});
 		};
 		
-	   this.init();
+		init();
+	   
    };
    
    $.fn.mediabrowser = function(options)
