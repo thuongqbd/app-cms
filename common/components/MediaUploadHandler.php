@@ -606,7 +606,7 @@ class MediaUploadHandler {
                     'crop'       => 1
                 ]
             ],
-            'files_per_page'                   => 10,
+            'files_per_page'                   => 40,
             'print_response'                   => true
         ];
 
@@ -804,9 +804,14 @@ class MediaUploadHandler {
                     $content[] = $this->generateResponse($media, $index);
                 }
             }
-            $response = [
-                $this->getOption('param_name') => $content
-            ];
+            
+			$response = [
+					$this->getOption('param_name') => $content,
+					'post_id' => $post_id,
+					'paging' => $this->getPagingData($pages)
+				];
+			
+			
         }
 
         $this->setResponse($response);
@@ -891,4 +896,35 @@ class MediaUploadHandler {
 
         return $this->getResponse($response, $printResponse);
     }
+	
+	private function getPagingData($pages){
+
+		$currentPage = $pages->getPage();
+		$perPage = $pages->getPageSize();
+		
+		$result = [
+			'next_url' => '',
+			'current_page' => $currentPage,
+			'per_page' => $perPage
+		];
+		
+		$pageCount = $pages->getPageCount();
+		if ($pageCount < 2 && $pages->hideOnSinglePage) {
+			return $result;
+		}
+		
+		if($currentPage + 1 < $pageCount){
+			if (($page = $currentPage + 1) >= $pageCount - 1) {
+				$page = $pageCount - 1;
+			}
+			return [
+				'next_url' => \yii\helpers\Url::to(['get-json','page'=>$page+1,'per-page'=>$pages->getPageSize()]),
+				'current_page' => $page,
+				'per_page' => $perPage,
+				
+			];
+		}
+		
+		return $result;
+	}
 } 

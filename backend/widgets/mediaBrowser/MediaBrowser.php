@@ -67,9 +67,7 @@ class MediaBrowser extends Widget
 		if(empty($this->pluginOptions['jsonUrl'])){
 			$this->pluginOptions['jsonUrl'] = Url::to(['media/get-json']);
 		}
-		if(empty($this->pluginOptions['paginationUrl'])){
-			$this->pluginOptions['paginationUrl'] = Url::to(['media/get-pagination']);
-		}
+
 		if(empty($this->pluginOptions['containerId'])){
 			$this->pluginOptions['containerId'] = $this->id;
 		}

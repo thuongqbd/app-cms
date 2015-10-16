@@ -20,7 +20,7 @@ use yii\bootstrap\ActiveForm;
 					<!-- BEGIN SIDEBAR LEFT -->
 					<div id="media-frame-menu" class="media-frame-menu">
 						<?php
-						$items[] = ['label' => 'All Media', 'url' => '#', 'options' => ['class' => 'active'], 'linkOptions' => ['class' => 'media-popup-nav all']];
+						$items[] = ['label' => 'Insert Media', 'url' => '#', 'options' => ['class' => 'active'], 'linkOptions' => ['class' => 'media-popup-nav all']];
 						echo Nav::widget([
 							'activateItems' => false,
 							'options'       => ['class' => 'nav nav-pills nav-stacked'],
@@ -108,21 +108,19 @@ use yii\bootstrap\ActiveForm;
 								<form id="media-filter" class="media-filter"
 									data-url="<?= Url::to('/media/get-json'); ?>"
 									method="post" action="<?= Url::to(['/site/forbidden']); ?>">
-									<div class="col-xs-7">
-										<div class="col-xs-4 form-group">
-											<?= Html::dropDownList('type', null, $widget->getTypeFilter(), [
-												'id'=>'type-filter',
-												'prompt' => Yii::t('writesdown', 'All media items'),
-												'class'=>'type-filter input-sm form-control'
-												])?>
-										</div>
-										<div class="col-xs-3 form-group">
-											<?= Html::dropDownList('type', null, $widget->getTypeFilter(), [
-												'id'=>'type-filter',
-												'prompt' => Yii::t('writesdown', 'All media items'),
-												'class'=>'type-filter input-sm form-control'
-												])?>
-										</div>
+									<div class="col-xs-3 form-group">
+										<?= Html::dropDownList('type', null, $widget->getTypeFilter(), [
+											'id'=>'type-filter',
+											'prompt' => Yii::t('writesdown', 'All media items'),
+											'class'=>'type-filter input-sm form-control'
+											])?>
+									</div>
+									<div class="col-xs-3 form-group">
+										<?= Html::dropDownList('type', null, $widget->getTypeFilter(), [
+											'id'=>'type-filter',
+											'prompt' => Yii::t('writesdown', 'All media items'),
+											'class'=>'date-filter input-sm form-control'
+											])?>
 									</div>
 									<div class="col-xs-5 input-group input-group-sm col-xs-offset-7">
 									<?= Html::textInput('title', null, [
@@ -138,24 +136,25 @@ use yii\bootstrap\ActiveForm;
 
 								</form>
 							</div>
-							<div class="media-sidebar">
+							<div class="media-sidebar" id="media-sidebar">
 								<div id="media-detail" class="media-detail"></div>
 								<div id="media-form" class="media-form"></div>
 							</div>
-							<ul id="media-container" class="media-container media-list" data-multiple="<?= $widget->multiple?1:0?>" data-editor="<?= $widget->editor?1:0?>"></ul>
-							<div id="media-pagination" class="media-pagination clearfix"></div>
+							<div id="media-scroll-container" class="media-scroll-container">
+								<ul id="media-container" class="media-container" data-multiple="<?= $widget->multiple?1:0?>" data-editor="<?= $widget->editor?1:0?>"></ul>
+							</div>
 						</div>
 					</div>
 				</div>
-				<div class="modal-footer">
+				<div class="modal-footer media-frame-toolbar">
 					<?= Html::button(Yii::t('writesdown', 'Insert Media'), [
-						'id'              => 'insert-media',
-						'class'           => 'insert-media btn btn-primary pull-right btn-flat',
-						'data-insert-url' => $widget->editor ?
-							Url::to(['/media/editor-insert']) :
-							Url::to(['/media/field-insert']),
-						'data-editor' => $widget->editor ?'1':'0'
-					]); ?>
+							'id'              => 'insert-media',
+							'class'           => 'insert-media btn btn-primary pull-right btn-flat',
+							'data-insert-url' => $widget->editor ?
+								Url::to(['/media/editor-insert']) :
+								Url::to(['/media/field-insert']),
+							'data-editor' => $widget->editor ?'1':'0'
+						]); ?>
 				</div>		
 			</div>
 		</div>
@@ -182,7 +181,7 @@ use yii\bootstrap\ActiveForm;
                 <div class="item">
                     <img src="{%=file.media_icon_url%}">
                     {% if(file.render_type != 'image') { %}<span class="media-description">{%=file.media_title%}</span>{% } %}
-                    <span class="selected-check"><i class="fa fa-check"></i><span>
+                    <span class="fa selected-check"><span>
                 </div>
             </li>
         {% } %}
@@ -192,13 +191,13 @@ use yii\bootstrap\ActiveForm;
 
 <script id="template-media-detail" type="text/x-tmpl">
     <h3><?= Yii::t('writesdown', 'MEDIA DETAILS') ?></h3>
-    <div class="media">
-        <div class="media-left">
-            <img alt="{%=o.media_title%}" style="width: 80px; height: 80px;" src="{%=o.media_icon_url%}">
+    <div class="media row">
+        <div class="col-xs-6 media-thumb">
+            <img alt="{%=o.media_title%}" src="{%=o.media_icon_url%}">
         </div>
-        <div class="media-body">
+        <div class="col-xs-6 media-info">
             <h4 class="media-heading">{%=o.media_filename%}</h4>
-            <div class="date">{%=o.media_date_formatted%}</div>
+            <div class="date">{%=o.media_data_formatted%}</div>
             <div class="file-size">{%=o.media_readable_size%}</div>
             <a id="delete-media" class="text-danger delete-media" href="#" data-url="{%=o.media_delete_url%}" data-id="{%=o.id%}"
                 data-confirm="<?= Yii::t('writesdown', 'Are you sure want to do this?'); ?>">
@@ -218,7 +217,7 @@ use yii\bootstrap\ActiveForm;
         <div class="form-group">
             <label for="media-media_url" class="col-sm-4 control-label"><?= Yii::t('writesdown', 'URL'); ?></label>
             <div class="col-sm-8">
-                <input type="text" class="form-control input-sm" id="media-media_url" placeholder="url"
+                <input type="text" class="input-sm form-control" id="media-media_url" placeholder="url"
                     value="{%=o.media_versions.full.url%}" readonly="true" name="media_url">
             </div>
         </div>
@@ -226,7 +225,7 @@ use yii\bootstrap\ActiveForm;
         <div class="form-group">
             <label for="media-media_title" class="col-sm-4 control-label"><?= Yii::t('writesdown', 'Title'); ?></label>
             <div class="col-sm-8">
-                <input type="text" class="form-control input-sm" id="media-media_title" data-attr="media_title"
+                <input type="text" class="input-sm form-control" id="media-media_title" data-attr="media_title"
                     placeholder="Title" value="{%=o.media_title%}" name="media_title">
             </div>
         </div>
@@ -234,7 +233,7 @@ use yii\bootstrap\ActiveForm;
         <div class="form-group">
             <label for="media-media_excerpt" class="col-sm-4 control-label"><?= Yii::t('writesdown', 'Caption'); ?></label>
             <div class="col-sm-8">
-                <textarea class="form-control input-sm" id="media-media_excerpt" data-attr="media_excerpt"
+                <textarea class="input-sm form-control" id="media-media_excerpt" data-attr="media_excerpt"
                     placeholder="Caption" name="media_excerpt">{%=o.media_excerpt%}</textarea>
             </div>
         </div>
@@ -242,62 +241,61 @@ use yii\bootstrap\ActiveForm;
         <div class="form-group">
             <label for="media-media_content" class="col-sm-4 control-label"><?= Yii::t('writesdown', 'Description'); ?></label>
             <div class="col-sm-8">
-                <textarea class="form-control input-sm" id="media-media_content" data-attr="media_content"
+                <textarea class="input-sm form-control" id="media-media_content" data-attr="media_content"
                     placeholder="Descrption" name="media_content">{%=o.media_content%}</textarea>
             </div>
-        </div>
-		
-		{% if (o.for_editor == true) { %}
-			<h4><?= Yii::t('writesdown', 'MEDIA DISPLAY SETTINGS'); ?></h4>
-
-			{% if (o.media_render_type == 'image') { %}
-				<div class="form-group">
-					<label for="media-media_alignment" class="col-sm-4 control-label">
-						<?= Yii::t('writesdown', 'Alignment'); ?>
-					</label>
-					<div class="col-sm-8">
-						<select class="form-control input-sm" id="media-media_alignment" name="media_alignment">
-							<option value="align-left"><?= Yii::t('writesdown', 'Left'); ?></option>
-							<option value="align-center"><?= Yii::t('writesdown', 'Center'); ?></option>
-							<option value="align-right"><?= Yii::t('writesdown', 'Right'); ?></option>
-							<option value="align-none"><?= Yii::t('writesdown', 'None'); ?></option>
-						</select>
-					</div>
-				</div>
-			{% } %}
-
-			<div class="form-group">
-				<label for="media-media_link_to" class="col-sm-4 control-label">
-					<?= Yii::t('writesdown', 'Link To'); ?>
-				</label>
-				<div class="col-sm-8">
-					<select class="form-control input-sm" id="media-media_link_to" name="media_link_to">
-						<option value="{%=o.media_view_url%}"><?= Yii::t('writesdown', 'Media') ?></option>
-						<option value="<?= Yii::$app->urlManagerFront->baseUrl . '/uploads/'; ?>{%=o.media_versions.full.url%}">File</option>
-
-						{% if (o.media_render_type == 'image') { %}
-							<option value="custom"><?= Yii::t('writesdown', 'Custom URL') ?></option>
-							<option value="none"><?= Yii::t('writesdown', 'None') ?></option>
-						{% } %}
-
-					</select>
-					<input type="text" class="form-control input-sm" id="media-media_link_to_value" placeholder="Link to"
-						value="{%=o.media_view_url%}" style="margin-top: 2px;" readonly="true" name="media_link_to_value">
-				</div>
-			</div>
-
-			{% if (o.media_render_type == 'image') { %}
-				<div class="form-group">
-					<label for="media-media_size" class="col-sm-4 control-label"><?= Yii::t('writesdown', 'Size'); ?></label>
-					<div class="col-sm-8">
-						<select class="form-control input-sm" id="media-media_size" name="media_size">
-							{% for (var i=0; i<o.media_size.length; i++) { %}
-								<option value="{%=o.media_size[i].version%}">{%=o.media_size[i].version%} {%=o.media_size[i].width%}x{%=o.media_size[i].height%}</option>
-							{% } %}
-						</select>
-					</div>
-				</div>
-			{% } %}
-		{% } %}
+        </div>		
     </form>
+</script>
+<script id="template-media-setting" type="text/x-tmpl">
+	<h3><?= Yii::t('writesdown', 'MEDIA DISPLAY SETTINGS'); ?></h3>
+	
+	{% if (o.media_render_type == 'image') { %}
+		<div class="form-group">
+			<label for="media-media_alignment" class="col-sm-4 control-label">
+				<?= Yii::t('writesdown', 'Alignment'); ?>
+			</label>
+			<div class="col-sm-8">
+				<select class="input-sm form-control" id="media-media_alignment" name="media_alignment">
+					<option value="align-left"><?= Yii::t('writesdown', 'Left'); ?></option>
+					<option value="align-center"><?= Yii::t('writesdown', 'Center'); ?></option>
+					<option value="align-right"><?= Yii::t('writesdown', 'Right'); ?></option>
+					<option value="align-none"><?= Yii::t('writesdown', 'None'); ?></option>
+				</select>
+			</div>
+		</div>
+	{% } %}
+
+	<div class="form-group">
+		<label for="media-media_link_to" class="col-sm-4 control-label">
+			<?= Yii::t('writesdown', 'Link To'); ?>
+		</label>
+		<div class="col-sm-8">
+			<select class="input-sm form-control" id="media-media_link_to" name="media_link_to">
+				<option value="{%=o.media_view_url%}"><?= Yii::t('writesdown', 'Media') ?></option>
+				<option value="<?= Yii::$app->urlManagerFront->baseUrl . '/uploads/'; ?>{%=o.media_versions.full.url%}">File</option>
+
+				{% if (o.media_render_type == 'image') { %}
+					<option value="custom"><?= Yii::t('writesdown', 'Custom URL') ?></option>
+					<option value="none"><?= Yii::t('writesdown', 'None') ?></option>
+				{% } %}
+
+			</select>
+			<input type="text" class="input-sm form-control" id="media-media_link_to_value" placeholder="Link to"
+				value="{%=o.media_view_url%}" style="margin-top: 2px;" readonly="true" name="media_link_to_value">
+		</div>
+	</div>
+
+	{% if (o.media_render_type == 'image') { %}
+		<div class="form-group">
+			<label for="media-media_size" class="col-sm-4 control-label"><?= Yii::t('writesdown', 'Size'); ?></label>
+			<div class="col-sm-8">
+				<select class="input-sm form-control" id="media-media_size" name="media_size">
+					{% for (var i=0; i<o.media_size.length; i++) { %}
+						<option value="{%=o.media_size[i].version%}">{%=o.media_size[i].version%} {%=o.media_size[i].width%}x{%=o.media_size[i].height%}</option>
+					{% } %}
+				</select>
+			</div>
+		</div>
+	{% } %}
 </script>
