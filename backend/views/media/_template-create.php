@@ -67,6 +67,12 @@
                         <span>Delete</span>
                     </button>
                 {% } %}
+                {% if (file.media_error) { %}
+                   <button class="btn btn-flat btn-warning cancel">
+                        <i class="glyphicon glyphicon-ban-circle"></i>
+                        <span>Cancel</span>
+                    </button>
+                {% } %}
             </div>
         </div>
     {% } %}

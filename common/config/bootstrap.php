@@ -8,3 +8,7 @@ Yii::setAlias('console', dirname(dirname(__DIR__)) . '/console');
 Yii::setAlias('modules', dirname(dirname(__DIR__)) . '/modules');
 Yii::setAlias('widgets', dirname(dirname(__DIR__)) . '/widgets');
 Yii::setAlias('themes', dirname(dirname(__DIR__)) . '/themes');
+
+// Url Aliases
+Yii::setAlias('@frontendUrl', 'http://funny.dev/');
+Yii::setAlias('@backendUrl', 'http://backend.funny.dev/');

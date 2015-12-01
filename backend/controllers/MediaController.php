@@ -156,6 +156,7 @@ class MediaController extends Controller
      */
     public function actionBulkAction()
     {
+        $redirect = Yii::$app->urlManager->createAbsoluteUrl('site/view/index');
         if (Yii::$app->request->post('action') == 'delete') {
             foreach (Yii::$app->request->post('ids') as $id) {
                 $uploadHandler = new MediaUploadHandler(null, false);

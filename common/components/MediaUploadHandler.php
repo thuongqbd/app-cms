@@ -854,10 +854,10 @@ class MediaUploadHandler {
                 }
             }
         } else {
-            $response[] = [
+            $response = [
                 'media_error'     => $this->_media->getErrors('file'),
-                'media_filename'  => isset($this->_media->file->name) ? $this->_media->file->name : null,
-                'media_file_size' => isset($this->_media->file->size) ? $this->_media->file->size : null,
+                'media_filename'  => isset($this->_media->file->name) ? $this->_media->file->name : null,'media_readable_size' => isset($this->_media->file->size) ? $this->_media->file->size : null,
+                'media_readable_size' => Yii::$app->formatter->asShortSize(isset($this->_media->file->size) ? $this->_media->file->size :0)
             ];
         }
 
@@ -907,12 +907,9 @@ class MediaUploadHandler {
 			'current_page' => $currentPage,
 			'per_page' => $perPage
 		];
-		
+
 		$pageCount = $pages->getPageCount();
-		if ($pageCount < 2 && $pages->hideOnSinglePage) {
-			return $result;
-		}
-		
+
 		if($currentPage + 1 < $pageCount){
 			if (($page = $currentPage + 1) >= $pageCount - 1) {
 				$page = $pageCount - 1;
